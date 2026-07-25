@@ -7,7 +7,7 @@ PKG_URL=""
 PKG_SOURCE_DIR=""
 # python3 must already be on the image (Kodi/LibreELEC ships it for addons);
 # SDL3_input provides libSDL3.so for the bridge to dlopen via ctypes.
-PKG_DEPENDS_TARGET="toolchain python3 SDL3_input systemd"
+PKG_DEPENDS_TARGET="toolchain Python3 SDL3_input systemd"
 PKG_LONGDESC="Bridges the new Steam Controller (2026)/Triton + Puck dongle into a full-featured virtual joystick via SDL3's hidapi driver, so RetroArch's udev joypad driver sees all buttons (including the back paddles) instead of the kernel's lizard-mode-only fallback."
 PKG_TOOLCHAIN="manual"
 
