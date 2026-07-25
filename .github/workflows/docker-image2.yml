@@ -2,20 +2,28 @@ name: Build Lakka RPi4 Image
 
 on:
   push:
-    branches: [ master, main ]
+    branches: [ master, main, Lakka-v6.1 ]
   pull_request:
-  workflow_dispatch: # Allows manual trigger from GitHub UI
+  workflow_dispatch:
 
 jobs:
   build:
-    runs-on: ubuntu-22.04 # Standard runner with enough disk space
+    runs-on: ubuntu-22.04
 
     steps:
-      # 1. Checkout the source code
+      # 1. Checkout source code
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      # 2. Install required host build dependencies
+      # 2. Free up ~30GB disk space (Essential for Lakka image compilation)
+      - name: Free Disk Space
+        run: |
+          sudo rm -rf /usr/share/dotnet
+          sudo rm -rf /usr/local/lib/android
+          sudo rm -rf /opt/ghc
+          sudo rm -rf /opt/hostedtoolcache/CodeQL
+
+      # 3. Install all required build & host dependencies
       - name: Install Build Dependencies
         run: |
           sudo apt-get update
@@ -36,14 +44,19 @@ jobs:
             patch \
             python3 \
             libjson-perl \
-            libparse-yapp-perl
+            libparse-yapp-perl \
+            xfonts-utils \
+            rdfind \
+            xsltproc \
+            libxml-parser-perl \
+            patchutils
 
-      # 3. Trigger the actual Lakka build command (NO ./configure!)
+      # 4. Trigger the build
       - name: Build Image
         run: |
           DISTRO=Lakka PROJECT=RPi DEVICE=RPi4 ARCH=arm make image
 
-      # 4. Upload the built image as a GitHub artifact
+      # 5. Upload build artifacts
       - name: Upload Build Artifact
         uses: actions/upload-artifact@v4
         with:
