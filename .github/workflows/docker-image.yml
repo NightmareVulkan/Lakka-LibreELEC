@@ -1,0 +1,40 @@
+name: Build Lakka Image
+
+on:
+  push:
+    branches: [ master, v5.x ]
+  pull_request:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        include:
+          - project: RPi
+            device: RPi4
+            arch: arm
+          - project: Generic
+            device: x86_64
+            arch: x86_64
+
+    steps:
+      - name: Checkout Source Code
+        uses: actions/checkout@v4
+
+      - name: Set up Docker Build Environment
+        run: |
+          docker build -t lakka-build .
+
+      - name: Build Lakka Image
+        run: |
+          docker run -v ${{ github.workspace }}:/build lakka-build sh -c "
+            cd /build && \
+            DISTRO=Lakka PROJECT=${{ matrix.project }} DEVICE=${{ matrix.device }} ARCH=${{ matrix.arch }} make image
+          "
+
+      - name: Upload Build Artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: Lakka-${{ matrix.device }}-${{ matrix.arch }}
+          path: target/*.tar
