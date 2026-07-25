@@ -6,21 +6,33 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
+    timeout-minutes: 350
 
     steps:
       - name: Checkout source
         uses: actions/checkout@v4
 
+      - name: Cache sources and build state
+        uses: actions/cache@v4
+        with:
+          path: |
+            sources
+            build.*
+          key: ${{ runner.os }}-lakka-${{ hashFiles('packages/**/package.mk') }}
+          restore-keys: |
+            ${{ runner.os }}-lakka-
+
       - name: Install dependencies
         run: |
           sudo apt update
           sudo apt install -y \
-            gcc g++ make git wget bc unzip \
-            xfonts-utils \
+            bc curl gcc g++ git gperf make \
+            openjdk-11-jre-headless rsync unzip \
+            xfonts-utils xsltproc xz-utils zip \
+            cmake \
+            wget \
             rdfind \
             libparse-yapp-perl \
-            gperf \
-            xsltproc \
             libxml-parser-perl \
             patchutils \
             lzop
@@ -34,3 +46,4 @@ jobs:
         with:
           name: lakka-rpi4-image
           path: target/*.img*
+
