@@ -1,48 +1,40 @@
-name: Build Lakka RPi4
+name: Build Lakka Image
 
 on:
-  workflow_dispatch:
+  push:
+    branches: [ master, v5.x ]
+  pull_request:
 
 jobs:
   build:
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        include:
+          - project: RPi
+            device: RPi4
+            arch: arm
+          - project: Generic
+            device: x86_64
+            arch: x86_64
 
     steps:
-      - name: Checkout source
+      - name: Checkout Source Code
         uses: actions/checkout@v4
 
-      - name: Cache sources and build state
-        uses: actions/cache@v4
-        with:
-          path: |
-            sources
-            build.*
-          key: ${{ runner.os }}-lakka-${{ hashFiles('packages/**/package.mk') }}
-          restore-keys: |
-            ${{ runner.os }}-lakka-
-
-      - name: Install dependencies
+      - name: Set up Docker Build Environment
         run: |
-          sudo apt update
-          sudo apt install -y \
-            bc curl gcc g++ git gperf make \
-            openjdk-11-jre-headless rsync unzip \
-            xfonts-utils xsltproc xz-utils zip \
-            cmake \
-            wget \
-            rdfind \
-            libparse-yapp-perl \
-            libxml-parser-perl \
-            patchutils \
-            lzop
+          docker build -t lakka-build .
 
-      - name: Build Lakka RPi4
+      - name: Build Lakka Image
         run: |
-          PROJECT=RPi DEVICE=RPi4 ARCH=arm make image
+          docker run -v ${{ github.workspace }}:/build lakka-build sh -c "
+            cd /build && \
+            DISTRO=Lakka PROJECT=${{ matrix.project }} DEVICE=${{ matrix.device }} ARCH=${{ matrix.arch }} make image
+          "
 
-      - name: Upload image
+      - name: Upload Build Artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: lakka-rpi4-image
-          path: target/*.img*
-
+          name: Lakka-${{ matrix.device }}-${{ matrix.arch }}
+          path: target/*.tar
