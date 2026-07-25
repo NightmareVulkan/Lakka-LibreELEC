@@ -1,0 +1,51 @@
+name: Build Lakka RPi4 Image
+
+on:
+  push:
+    branches: [ master, main ]
+  pull_request:
+  workflow_dispatch: # Allows manual trigger from GitHub UI
+
+jobs:
+  build:
+    runs-on: ubuntu-22.04 # Standard runner with enough disk space
+
+    steps:
+      # 1. Checkout the source code
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      # 2. Install required host build dependencies
+      - name: Install Build Dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y \
+            build-essential \
+            gawk \
+            git \
+            unzip \
+            wget \
+            diffstat \
+            texinfo \
+            chrpath \
+            sed \
+            bc \
+            lzop \
+            xxd \
+            gperf \
+            patch \
+            python3 \
+            libjson-perl \
+            libparse-yapp-perl
+
+      # 3. Trigger the actual Lakka build command (NO ./configure!)
+      - name: Build Image
+        run: |
+          DISTRO=Lakka PROJECT=RPi DEVICE=RPi4 ARCH=arm make image
+
+      # 4. Upload the built image as a GitHub artifact
+      - name: Upload Build Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: Lakka-RPi4-Image
+          path: target/*.tar
