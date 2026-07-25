@@ -11,11 +11,11 @@ jobs:
     runs-on: ubuntu-22.04
 
     steps:
-      # 1. Checkout source code
+      # 1. Checkout repository
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      # 2. Free up ~30GB disk space
+      # 2. Free up disk space
       - name: Free Disk Space
         run: |
           sudo rm -rf /usr/share/dotnet
@@ -23,7 +23,7 @@ jobs:
           sudo rm -rf /opt/ghc
           sudo rm -rf /opt/hostedtoolcache/CodeQL
 
-      # 3. Install build dependencies
+      # 3. Install host build dependencies
       - name: Install Build Dependencies
         run: |
           sudo apt-get update
@@ -51,18 +51,20 @@ jobs:
             libxml-parser-perl \
             patchutils
 
-      # 4. Pre-download sources that mirror links fail on
+      # 4. Pre-download using kernel.org mirror (avoids GNU 502/404 errors)
       - name: Pre-download source packages
         run: |
           mkdir -p sources/make
+          wget -c https://mirrors.kernel.org/gnu/make/make-4.4.1.tar.gz -O sources/make/make-4.4.1.tar.gz || \
+          wget -c https://gnu.mirror.constant.com/make/make-4.4.1.tar.gz -O sources/make/make-4.4.1.tar.gz || \
           wget -c https://ftp.gnu.org/gnu/make/make-4.4.1.tar.gz -O sources/make/make-4.4.1.tar.gz
 
-      # 5. Trigger the build
+      # 5. Trigger Lakka build
       - name: Build Image
         run: |
           DISTRO=Lakka PROJECT=RPi DEVICE=RPi4 ARCH=arm make image
 
-      # 6. Upload build artifacts
+      # 6. Upload artifact
       - name: Upload Build Artifact
         uses: actions/upload-artifact@v4
         with:
