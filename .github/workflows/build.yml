@@ -1,4 +1,4 @@
-name: Build Lakka
+name: Build Lakka RPi4
 
 on:
   workflow_dispatch:
@@ -11,8 +11,11 @@ jobs:
       - name: Checkout source
         uses: actions/checkout@v4
 
-      - name: Build
+      - name: Install dependencies
         run: |
           sudo apt update
-          sudo apt install -y git make gcc g++ wget bc
-          PROJECT=Generic ARCH=x86_64 make image
+          sudo apt install -y gcc g++ make git wget bc unzip
+
+      - name: Build Lakka RPi4
+        run: |
+          PROJECT=RPi4 ARCH=arm make image
