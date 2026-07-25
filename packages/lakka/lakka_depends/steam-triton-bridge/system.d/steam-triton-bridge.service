@@ -1,0 +1,11 @@
+[Unit]
+Description=Steam Controller (2026) Triton hidapi-to-uinput bridge
+# Only meant to be started by the udev rule (SYSTEMD_WANTS) when the
+# Puck (28de:1304) is present -- do not add to any .target's WantedBy.
+StopWhenUnneeded=yes
+
+[Service]
+Type=simple
+ExecStart=/usr/bin/python3 /usr/lib/steam-triton-bridge/steam_triton_bridge.py
+Restart=on-failure
+RestartSec=2

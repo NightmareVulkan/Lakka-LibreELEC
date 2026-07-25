@@ -1,0 +1,6 @@
+# Start the Steam Controller (2026) Triton bridge only while the Puck
+# dongle is actually plugged in. systemd will stop the service again
+# automatically (StopWhenUnneeded) once the device is removed, since
+# nothing else references the unit.
+SUBSYSTEM=="usb", ACTION=="add", ATTR{idVendor}=="28de", ATTR{idProduct}=="1304", \
+  TAG+="systemd", ENV{SYSTEMD_WANTS}+="steam-triton-bridge.service"
