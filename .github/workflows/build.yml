@@ -1,4 +1,4 @@
-name: Build Lakka RPi
+name: Build Lakka RPi4
 
 on:
   workflow_dispatch:
@@ -16,6 +16,6 @@ jobs:
           sudo apt update
           sudo apt install -y gcc g++ make git wget bc unzip
 
-      - name: Build Lakka Raspberry Pi
+      - name: Build Lakka RPi4
         run: |
-          PROJECT=RPi ARCH=arm make image
+          PROJECT=RPi DEVICE=RPi4 ARCH=arm make image
