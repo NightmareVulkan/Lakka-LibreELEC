@@ -14,8 +14,23 @@ jobs:
       - name: Install dependencies
         run: |
           sudo apt update
-          sudo apt install -y gcc g++ make git wget bc unzip
+          sudo apt install -y \
+            gcc g++ make git wget bc unzip \
+            xfonts-utils \
+            rdfind \
+            libparse-yapp-perl \
+            gperf \
+            xsltproc \
+            libxml-parser-perl \
+            patchutils \
+            lzop
 
       - name: Build Lakka RPi4
         run: |
           PROJECT=RPi DEVICE=RPi4 ARCH=arm make image
+
+      - name: Upload image
+        uses: actions/upload-artifact@v4
+        with:
+          name: lakka-rpi4-image
+          path: target/*.img*
